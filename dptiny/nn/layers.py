@@ -80,6 +80,7 @@ class Conv2d(Module):
         kernel_size: ShapeLike,
         stride: Union[int, Tuple[int, int]] = 1,
         pad: Union[int, Tuple[int, int]] = 0,
+        dilation: Union[int, Tuple[int, int]] = 1,
         nobias: bool = False,
         init_type: str = "he",
         dtype=xp.float32,
@@ -90,6 +91,7 @@ class Conv2d(Module):
         self.kernel_size = utils.pair(kernel_size)
         self.stride = stride
         self.pad = pad
+        self.dilation = dilation
 
         KH, KW = self.kernel_size
         fan_in = in_channels * KH * KW
@@ -103,7 +105,13 @@ class Conv2d(Module):
         )
 
     def forward(self, x):
-        y = F.conv2d(x, self.W, stride=self.stride, pad=self.pad)
+        y = F.conv2d(
+            x,
+            self.W,
+            stride=self.stride,
+            pad=self.pad,
+            dilation=self.dilation,
+        )
         if self.b is not None:
             y = y + F.reshape(self.b, (1, self.out_channels, 1, 1))
         return y
